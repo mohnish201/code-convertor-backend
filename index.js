@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const openAI = require("openai");
+const { default: axios } = require("axios");
 require("dotenv").config();
 
 const app = express();
@@ -9,70 +10,94 @@ app.use(cors());
 
 const port = process.env.PORT;
 
-const openai = new openAI({
-  apiKey: process.env.OPENAPI_URL,
-});
+// const openai = new openAI({
+//   apiKey: process.env.OPENAPI_URL,
+// });
 
 // code convertor
 app.post("/convert", async (req, res) => {
   const { language, code } = req.body;
 
-  try {
-    const chatCompletion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: `Act as a code converter, You have to convert the given code into the ${language} language and do not need to provide an explanation of the code alter the code and provide the converted code only, do not write anything extra other than the converted code, also you need not to provide any note as well
+  await axios
+    .post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        messages: [
+          {
+            role: "user",
+            content: `Act as a code converter, You have to convert the given code into the ${language} language and do not need to provide an explanation of the code alter the code and provide the converted code only, do not write anything extra other than the converted code, also you need not to provide any note as well
          the code that you need to convert is : ${code}`,
+          },
+        ],
+        model: "gpt-3.5-turbo",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAPI_URL}`,
+          "Content-Type": "application/json",
         },
-      ],
-      model: "gpt-3.5-turbo",
+      }
+    )
+    .then((response) => {
+      res.json({
+        msg: "Response Created",
+        response: response.data.choices[0].message.content,
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.send({ Error_Message: "There is an error in Backend", error });
     });
-
-    res.json({
-      msg: "Response Created",
-      response: chatCompletion.choices[0].message.content,
-    });
-  } catch (error) {
-    console.log(error);
-    res.send({ Error_Message: "There is an error in Backend", error });
-  }
 });
 
 //code Debugger
 app.post("/debug", async (req, res) => {
   const { code } = req.body;
-  try {
-    const chatCompletion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: `Act as a Professional code Debugger, You have to debug the given code with less and precise Explanation and need not go into deep explanation.
-          The given code is :${code}`,
-        },
-      ],
-      model: "gpt-3.5-turbo",
-    });
 
-    res.json({
-      msg: "Response Created",
-      response: chatCompletion.choices[0].message.content,
+  await axios
+    .post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        messages: [
+          {
+            role: "user",
+            content: `Act as a Professional code Debugger, You have to debug the given code with less and precise Explanation and need not go into deep explanation.
+                The given code is :${code}`,
+          },
+        ],
+        model: "gpt-3.5-turbo",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAPI_URL}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((response) => {
+      res.json({
+        msg: "Response Created",
+        response: response.choices[0].message.content,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send({ Error_Message: "There is an error in Backend", err });
     });
-  } catch (error) {
-    console.log(error);
-    res.send({ Error_Message: "There is an error in Backend", error });
-  }
 });
 
 //code Quality Checker
 app.post("/qualityCheck", async (req, res) => {
   const { code } = req.body;
-  try {
-    const chatCompletion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: `
+
+  await axios
+    .post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        messages: [
+          {
+            role: "user",
+            content: `
             
             Act as a Professional Developer and code quality checker, you have to check the quality of code on the following basis :
             
@@ -89,19 +114,27 @@ app.post("/qualityCheck", async (req, res) => {
             Provide a summary  of code quality and a report showing the percentage-wise evaluation for each parameter mentioned above.
             
             the following code is : ${code} `,
+          },
+        ],
+        model: "gpt-3.5-turbo",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAPI_URL}`,
+          "Content-Type": "application/json",
         },
-      ],
-      model: "gpt-3.5-turbo",
+      }
+    )
+    .then((response) => {
+      res.json({
+        msg: "Response Created",
+        response: response.data.choices[0].message.content,
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.send({ Error_Message: "There is an error in Backend", error });
     });
-
-    res.json({
-      msg: "Response Created",
-      response: chatCompletion.choices[0].message.content,
-    });
-  } catch (error) {
-    console.log(error);
-    res.send({ Error_Message: "There is an error in Backend", error });
-  }
 });
 
 app.listen(port, () => {
