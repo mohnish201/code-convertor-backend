@@ -9,7 +9,6 @@ app.use(cors());
 
 const port = process.env.PORT;
 
-
 // code convertor
 app.post("/convert", async (req, res) => {
   const { language, code } = req.body;
@@ -42,7 +41,7 @@ app.post("/convert", async (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      res.send({ Error_Message: "There is an error in Backend", error });
+      res.send({ Error_Message: "There is an error in Backend", error: error});
     });
 });
 
@@ -73,12 +72,12 @@ app.post("/debug", async (req, res) => {
     .then((response) => {
       res.json({
         msg: "Response Created",
-        response: response.choices[0].message.content,
+        response: response.data.choices[0].message.content,
       });
     })
     .catch((err) => {
       console.log(err);
-      res.send({ Error_Message: "There is an error in Backend", err });
+      res.send({ Error_Message: "There is an error in Backend", err: err });
     });
 });
 
@@ -129,7 +128,7 @@ app.post("/qualityCheck", async (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      res.send({ Error_Message: "There is an error in Backend", error });
+      res.send({ Error_Message: "There is an error in Backend", error:error });
     });
 });
 
