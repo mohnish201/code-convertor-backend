@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const openAI = require("openai");
 const { default: axios } = require("axios");
 require("dotenv").config();
 
@@ -10,9 +9,6 @@ app.use(cors());
 
 const port = process.env.PORT;
 
-// const openai = new openAI({
-//   apiKey: process.env.OPENAPI_URL,
-// });
 
 // code convertor
 app.post("/convert", async (req, res) => {
